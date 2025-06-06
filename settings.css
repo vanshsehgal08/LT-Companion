@@ -1,0 +1,33 @@
+.settings-container {
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.api-key-input {
+  width: 100%;
+  padding: 8px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.save-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.save-button:hover {
+  background-color: #0056b3;
+}
+
+.status-message {
+  margin-top: 10px;
+  text-align: center;
+  color: #666;
+} 
