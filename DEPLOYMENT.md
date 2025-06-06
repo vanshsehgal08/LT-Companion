@@ -81,17 +81,6 @@ Your API key is stored securely in your browser's local storage and is not acces
 5.  On the problem description page, you will find a "Copy" button below the problem title. Click it to copy the problem statement.
 6.  Interact with the floating modal window - you can drag it, minimize it, or close it.
 
-## Step 6: Package for Distribution (Optional)
-
-If you intend to distribute your extension:
-
-1.  Go back to `chrome://extensions/`.
-2.  With Developer mode enabled, find your LeetCode Companion extension.
-3.  Click the "Pack extension" button.
-4.  In the dialog, specify the extension root directory (e.g., `leetcode-companion`). You can optionally provide a .pem file from a previous packaging if you are updating.
-5.  Click "Pack Extension".
-6.  Chrome will create a `.crx` file (the installable extension package) and a `.pem` file (a private key). Keep the `.pem` file safe, as it's needed for updating your extension while keeping the same extension ID.
-
 ## Troubleshooting
 
 ### Common Issues:
