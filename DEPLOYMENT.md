@@ -1,36 +1,44 @@
-# LeetCode Hints Provider - Deployment Guide
+# LeetCode Companion - Deployment Guide
+
+This guide explains how to deploy and set up the LeetCode Companion Chrome extension.
 
 ## Prerequisites
 
-1. Google Chrome browser
-2. A Google Cloud Platform (GCP) account
-3. Basic knowledge of Chrome extensions
+1.  Google Chrome browser.
+2.  A Google account to obtain a Gemini API key.
 
-## Step 1: Set Up Google Cloud Project
+## Step 1: Obtain a Gemini API Key
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project:
-   - Click on the project dropdown at the top
-   - Click "New Project"
-   - Name it "LeetCode Hints Provider"
-   - Click "Create"
+The LeetCode Companion extension uses Google's Gemini API for features like code analysis, test case generation, and approach suggestions. You need an API key to use these features.
 
-3. Enable the Gemini API:
-   - In the left sidebar, go to "APIs & Services" > "Library"
-   - Search for "Gemini API"
-   - Click "Enable"
+You can obtain a Gemini API key from either Google AI Studio or Google Cloud Console.
 
-4. Create API credentials:
-   - Go to "APIs & Services" > "Credentials"
-   - Click "Create Credentials" > "API Key"
-   - Copy the generated API key
-   - (Optional) Restrict the API key to only the Gemini API
+### Option 1: Google AI Studio (Recommended for personal use)
+
+1.  Go to [Google AI Studio](https://aistudio.google.com/).
+2.  Sign in with your Google account.
+3.  Navigate to "Get API key" in the left sidebar.
+4.  Create a new API key.
+5.  Copy the generated API key.
+
+### Option 2: Google Cloud Console
+
+1.  Go to [Google Cloud Console](https://console.cloud.google.com/).
+2.  Create a new project or select an existing one.
+3.  In the left sidebar, navigate to "APIs & Services" > "Library".
+4.  Search for "Gemini API" (or a specific Gemini model like "Gemini 2.0 Flash").
+5.  Click "Enable" for the relevant API.
+6.  Go to "APIs & Services" > "Credentials".
+7.  Click "Create Credentials" > "API Key".
+8.  Copy the generated API key.
+9.  **(Optional but Recommended)** Restrict the API key to only the Gemini API and/or restrict it by your website (although for a Chrome extension, HTTP referrer restrictions are less straightforward).
 
 ## Step 2: Prepare Extension Files
 
-1. Create the following directory structure:
+Ensure you have the extension files, typically obtained by cloning the project repository. The basic structure should include:
+
 ```
-leetcode-hints-provider/
+leetcode-companion/
 ├── icons/
 │   ├── icon16.png
 │   ├── icon48.png
@@ -39,94 +47,90 @@ leetcode-hints-provider/
 ├── popup.html
 ├── popup.js
 ├── content.js
-├── background.js
-├── styles.css
 └── README.md
+├── REPORT.MD
 ```
-
-2. Create extension icons:
-   - Create three icon files (16x16, 48x48, and 128x128 pixels)
-   - Place them in the `icons` directory
-   - You can use any image editor or online icon generator
+*(Note: There might be other files like background scripts or stylesheets depending on the implementation details, but the core functional files are listed above.)*
 
 ## Step 3: Load the Extension in Chrome
 
-1. Open Chrome and go to `chrome://extensions/`
-2. Enable "Developer mode" in the top right corner
-3. Click "Load unpacked"
-4. Select your extension directory (`leetcode-hints-provider`)
+1.  Open Google Chrome.
+2.  Go to `chrome://extensions/` in the address bar.
+3.  Enable "Developer mode" in the top right corner of the Extensions page.
+4.  Click the "Load unpacked" button that appears on the left.
+5.  Select the directory containing your extension files (`leetcode-companion`).
 
-## Step 4: Configure the Extension
+The extension should now appear in your list of installed extensions.
 
-1. Click the extension icon in Chrome's toolbar
-2. Enter your Gemini API key in the settings
-3. Click "Save"
+## Step 4: Configure the Extension with your API Key
 
-## Step 5: Test the Extension
+1.  Once the extension is loaded, you will see its icon in the Chrome toolbar. Pin the extension icon for easy access if you prefer.
+2.  Click the LeetCode Companion extension icon.
+3.  A small popup window will appear.
+4.  Enter the Gemini API key you obtained in Step 1 into the provided input field.
+5.  Click the "Save" button.
 
-1. Go to [LeetCode](https://leetcode.com/)
-2. Open any problem
-3. Click the "Get Hint" button that appears in the bottom right
-4. Select your programming language
-5. Choose a hint level
-6. Verify that hints are generated correctly
+Your API key is stored securely in your browser's local storage and is not accessible by websites.
+
+## Step 5: Use the Extension on LeetCode
+
+1.  Navigate to any LeetCode problem page (e.g., `https://leetcode.com/problems/two-sum/`).
+2.  You should see a floating button (question mark icon) near the bottom right of the page. Click it to open the feature menu.
+3.  You will see buttons for "Generate Hint", "Analyze Code", "Generate Test Cases", and "Suggest Approach". Click any of these to open the floating modal with AI-powered information.
+4.  A shield icon button will also be present near the floating menu button. Click it to toggle Discipline Mode (hiding solutions/editorial tabs and redirecting).
+5.  On the problem description page, you will find a "Copy" button below the problem title. Click it to copy the problem statement.
+6.  Interact with the floating modal window - you can drag it, minimize it, or close it.
 
 ## Step 6: Package for Distribution (Optional)
 
-If you want to distribute the extension:
+If you intend to distribute your extension:
 
-1. Go to `chrome://extensions/`
-2. Click "Pack extension"
-3. Select your extension directory
-4. Click "Pack Extension"
-5. This will create two files:
-   - `.crx` file (the extension)
-   - `.pem` file (private key - keep this secure)
+1.  Go back to `chrome://extensions/`.
+2.  With Developer mode enabled, find your LeetCode Companion extension.
+3.  Click the "Pack extension" button.
+4.  In the dialog, specify the extension root directory (e.g., `leetcode-companion`). You can optionally provide a .pem file from a previous packaging if you are updating.
+5.  Click "Pack Extension".
+6.  Chrome will create a `.crx` file (the installable extension package) and a `.pem` file (a private key). Keep the `.pem` file safe, as it's needed for updating your extension while keeping the same extension ID.
 
 ## Troubleshooting
 
 ### Common Issues:
 
-1. **Extension not loading:**
-   - Check if all files are in the correct location
-   - Verify manifest.json syntax
-   - Check Chrome's console for errors
-
-2. **API not working:**
-   - Verify API key is correct
-   - Check if Gemini API is enabled
-   - Look for API quota limits
-
-3. **Hints not generating:**
-   - Check browser console for errors
-   - Verify internet connection
-   - Ensure you're on a LeetCode problem page
+*   **Extension icon is grayed out:** Ensure you are on a supported URL (a LeetCode problem page).
+*   **AI features not working:**
+    *   Verify you have entered and saved the correct Gemini API key in the extension popup.
+    *   Check your browser's developer console (F12 > Console) for any API errors or network issues.
+    *   Ensure you have enabled the Gemini API in your Google Cloud project or AI Studio.
+    *   Check your API usage and quotas in Google Cloud Console.
+*   **Discipline Mode not hiding tabs:** Ensure you are on a problem page and not the main LeetCode explore or contest page.
+*   **Floating elements not appearing:** Check your browser's developer console for JavaScript errors on the LeetCode page.
 
 ### Debugging:
 
-1. Open Chrome DevTools (F12)
-2. Go to the "Console" tab
-3. Look for any error messages
-4. Check the "Network" tab for API requests
+1.  Open Chrome DevTools (F12).
+2.  For issues within the LeetCode page (floating buttons, modal), go to the "Console" tab and look for errors. You can also inspect elements on the page.
+3.  For issues related to the extension's background script or popup, go to `chrome://extensions/`, find your extension, click "Inspect views:" and select the relevant option (e.g., "background page" or "popup"). This opens a separate DevTools window.
+4.  Use the "Network" tab in DevTools to see if API calls are being made successfully.
 
 ## Security Considerations
 
-1. Never share your API key
-2. Keep the `.pem` file secure if you package the extension
-3. Consider adding API key restrictions in Google Cloud Console
-4. Regularly update the extension for security patches
+1.  Keep your Gemini API key confidential. Do not share it or expose it in your code.
+2.  Store your `.pem` file securely if you packaged the extension.
+3.  Be cautious of phishing attempts or requests for your API key.
+4.  Keep the extension updated to receive security patches.
 
 ## Maintenance
 
-1. Monitor API usage in Google Cloud Console
-2. Keep the extension updated with Chrome's latest features
-3. Regularly check for and fix any bugs
-4. Update the Gemini API integration if needed
+1.  Monitor your Gemini API usage in Google Cloud Console or AI Studio.
+2.  Regularly test the extension on LeetCode to ensure features are working after LeetCode updates.
+3.  Address any reported bugs or issues.
+4.  Consider updating the Gemini model or API integration as new versions become available.
 
 ## Support
 
-If you encounter any issues:
-1. Check the troubleshooting section
-2. Review the README.md file
-3. Check for updates to the extension
-4. Contact the development team if needed 
+If you need help:
+
+1.  Review this deployment guide and the `README.md`.
+2.  Check the troubleshooting section.
+3.  If you obtained the code from a repository, check the issue tracker there.
+4.  Contact the developer(s) if necessary.
