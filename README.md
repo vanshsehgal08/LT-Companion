@@ -50,7 +50,7 @@ A Chrome extension that provides helpful tools powered by AI and other features 
 
 ## 📦 Deployment Instructions
 
-See [deployment.md](deployment.md) for detailed deployment steps.
+See [deployment.md](DEPLOYMENT.md) for detailed deployment steps.
 
 ## Contributing
 
