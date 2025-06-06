@@ -65,12 +65,12 @@ The extension should now appear in your list of installed extensions.
 ## Step 4: Configure the Extension with your API Key
 
 1.  Once the extension is loaded, you will see its icon in the Chrome toolbar. Pin the extension icon for easy access if you prefer.
-2.  Click the LeetCode Companion extension icon.
-3.  A small popup window will appear.
-4.  Enter the Gemini API key you obtained in Step 1 into the provided input field.
-5.  Click the "Save" button.
+2.  Click the LeetCode Companion extension icon to open the settings popup.
+3.  In the popup window enter your Gemini API key in the masked input field.
+4.  Click the "Save API Key" button.
+5.  You'll see a success message if the key is saved correctly, or an error message if something goes wrong.
 
-Your API key is stored securely in your browser's local storage and is not accessible by websites.
+Your API key is stored securely in Chrome's sync storage and is not accessible by websites. The key is automatically loaded when you reopen the popup.
 
 ## Step 5: Use the Extension on LeetCode
 
@@ -80,6 +80,7 @@ Your API key is stored securely in your browser's local storage and is not acces
 4.  A shield icon button will also be present near the floating menu button. Click it to toggle Discipline Mode (hiding solutions/editorial tabs and redirecting).
 5.  On the problem description page, you will find a "Copy" button below the problem title. Click it to copy the problem statement.
 6.  Interact with the floating modal window - you can drag it, minimize it, or close it.
+
 
 ## Troubleshooting
 
@@ -114,12 +115,3 @@ Your API key is stored securely in your browser's local storage and is not acces
 2.  Regularly test the extension on LeetCode to ensure features are working after LeetCode updates.
 3.  Address any reported bugs or issues.
 4.  Consider updating the Gemini model or API integration as new versions become available.
-
-## Support
-
-If you need help:
-
-1.  Review this deployment guide and the `README.md`.
-2.  Check the troubleshooting section.
-3.  If you obtained the code from a repository, check the issue tracker there.
-4.  Contact the developer(s) if necessary.

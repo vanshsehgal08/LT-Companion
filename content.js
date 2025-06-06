@@ -187,20 +187,35 @@ async function analyzeCodeFromDOM() {
   }
 }
 
-// Function to get dynamic hint
-function getDynamicHint(problemInfo, hintIndex) {
-  const exampleHints = [
-    `Think about how you can represent the equivalence relationships between characters. A data structure that can group equivalent items together would be useful. Consider using the "Union Find" or "Disjoint Set Union" data structure.`,
-    `Remember that when two characters are equivalent, all their equivalence relations should be transitive. How can you ensure that the smallest lexicographical character is always chosen as the representative?`,
-    `Try to build a mapping from each character to its smallest equivalent character. When constructing the answer string, always use this mapping for each character in baseStr.`,
-    `Optimize your solution by using path compression in your Union Find implementation to make the find operation efficient.`
-  ];
-  if (hintIndex < exampleHints.length) return exampleHints[hintIndex];
-  return `No more hints available. Try implementing your solution!`;
+// Function to get dynamic hint (now using Gemini)
+async function getDynamicHint(problemInfo, hintIndex) {
+  try {
+    const apiKey = await getGeminiApiKey();
+    showHintModal(`Fetching Hint ${hintIndex + 1}, please wait...`);
+    
+    // Refine the prompt based on the hint index for progressive hints
+    let hintLevelPrompt = "Provide a subtle hint that guides the user towards the approach.";
+    if (hintIndex === 1) {
+        hintLevelPrompt = "Give a slightly more specific hint, perhaps mentioning a key data structure or algorithm idea without revealing the full solution.";
+    } else if (hintIndex === 2) {
+        hintLevelPrompt = "Offer a more detailed hint, outlining a significant step or component of the solution approach.";
+    } else if (hintIndex >= 3) {
+        hintLevelPrompt = "Provide a final, more direct hint about a crucial part of the implementation or optimization.";
+    }
+
+    const prompt = `Based on the following LeetCode problem title and description, ${hintLevelPrompt} Do not provide the full solution or code. Keep the hint concise and focused.\n\nProblem Title: ${problemInfo.title}\nProblem Description: ${problemInfo.description}`;
+    
+    const hint = await callGeminiApi(prompt, apiKey);
+    
+    return hint;
+  } catch (e) {
+    console.error('Error generating hint with Gemini:', e);
+    return 'Error generating hint: ' + e; // Return an error message to the user
+  }
 }
 
-// Function to show next hint
-function showNextHint() {
+// Function to show next hint (updated to handle async)
+async function showNextHint() { // Made async
   const problemInfo = getProblemInfo();
   if (problemInfo.error) {
     showHintModal('Could not fetch problem info: ' + problemInfo.error);
@@ -211,14 +226,25 @@ function showNextHint() {
     currentHintIndex = 0;
     lastProblemTitle = problemInfo.title;
   }
-  const nextHint = getDynamicHint(problemInfo, currentHintIndex);
+
+  // Show a loading message while fetching the hint
+  showHintModal(`Fetching Hint ${currentHintIndex + 1} for: ${problemInfo.title}...`);
+
+  const nextHint = await getDynamicHint(problemInfo, currentHintIndex); // Await the async call
+  
+  if (nextHint.startsWith('Error generating hint:')) { // Check if an error was returned
+      showHintModal(nextHint);
+      return;
+  }
+
   if (shownHints.length <= currentHintIndex) {
     shownHints.push(nextHint);
   }
   currentHintIndex++;
+  
   let allHintsHtml = `<div style='font-size:1.1em;margin-bottom:10px;'><b>${problemInfo.title}</b></div>`;
   shownHints.forEach((hint, idx) => {
-    allHintsHtml += `<div style='margin-bottom:12px; color:#e0e0e0;'><b>Hint ${idx+1}:</b><br>${hint}</div>`;
+    allHintsHtml += `<div style='margin-bottom:12px; color:#e0e0e0;'><b>Hint ${idx+1}:</b><br>${renderMarkdown(hint)}</div>`; // Render markdown for hints
   });
   showHintModal(allHintsHtml);
 }
