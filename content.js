@@ -104,7 +104,7 @@ async function generateTestCases() {
 
   try {
     const apiKey = await getGeminiApiKey();
-    showHintModal('Generating test cases with Gemini, please wait...');
+    showHintModal('Generating test cases, please wait...');
     const prompt = `Generate 3-5 diverse test cases for the following LeetCode problem. Include edge cases and constraints mentioned in the description. For each test case, provide the input and the expected output.
 
 Format the output strictly as a list of test cases, like this:
@@ -141,17 +141,17 @@ Problem Title: ${problemInfo.title}\nProblem Description: ${problemInfo.descript
 
 // Function to suggest algorithm/data structure with Gemini
 async function suggestApproach() {
-  const problemInfo = getProblemInfo();
+        const problemInfo = getProblemInfo();
   if (problemInfo.error) {
     showHintModal('Could not fetch problem info: ' + problemInfo.error);
     return;
   }
 
-  showHintModal('Fetching Gemini API key and suggesting approach, please wait...');
+  showHintModal('Fetching API key and suggesting approach, please wait...');
 
   try {
     const apiKey = await getGeminiApiKey();
-    showHintModal('Suggesting approach with Gemini, please wait...');
+    showHintModal('Suggesting approach, please wait...');
     const prompt = `Based on the following LeetCode problem title and description, suggest relevant algorithms, data structures, or common patterns that could be used to solve it. Provide a brief explanation for each suggestion and why it's applicable. List 2-4 relevant approaches.
 
 Problem Title: ${problemInfo.title}\nProblem Description: ${problemInfo.description}`;
@@ -176,10 +176,10 @@ async function analyzeCodeFromDOM() {
     showHintModal('Could not read code from the editor.');
     return;
   }
-  showHintModal('Fetching Gemini API key and analyzing code, please wait...');
+  showHintModal('Fetching API key and analyzing code, please wait...');
   try {
     const apiKey = await getGeminiApiKey();
-    showHintModal('Analyzing code with Gemini, please wait...');
+    showHintModal('Analyzing code, please wait...');
     const analysis = await analyzeCodeWithGemini(code, apiKey);
     showHintModal(renderMarkdown(analysis));
   } catch (e) {
