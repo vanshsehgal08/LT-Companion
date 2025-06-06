@@ -3,8 +3,10 @@ let isInitialized = false;
 let isDisciplineModeEnabled = false;
 
 // Store shown hints and current index globally
-let shownHints = [];
-let currentHintIndex = 0;
+let shownProblemHints = [];
+let currentProblemHintIndex = 0;
+let shownCodeHints = [];
+let currentCodeHintIndex = 0;
 let lastProblemTitle = '';
 
 // Function to get problem information
@@ -187,11 +189,11 @@ async function analyzeCodeFromDOM() {
   }
 }
 
-// Function to get dynamic hint (now using Gemini)
-async function getDynamicHint(problemInfo, hintIndex) {
+// Function to get dynamic problem hint (now using Gemini)
+async function getDynamicProblemHint(problemInfo, hintIndex) {
   try {
     const apiKey = await getGeminiApiKey();
-    showHintModal(`Fetching Hint ${hintIndex + 1}, please wait...`);
+    showHintModal(`Fetching Problem Hint ${hintIndex + 1}, please wait...`);
     
     // Refine the prompt based on the hint index for progressive hints
     let hintLevelPrompt = "Provide a subtle hint that guides the user towards the approach.";
@@ -209,42 +211,98 @@ async function getDynamicHint(problemInfo, hintIndex) {
     
     return hint;
   } catch (e) {
-    console.error('Error generating hint with Gemini:', e);
-    return 'Error generating hint: ' + e; // Return an error message to the user
+    console.error('Error generating problem hint with Gemini:', e);
+    return 'Error generating hint: ' + e;
   }
 }
 
-// Function to show next hint (updated to handle async)
-async function showNextHint() { // Made async
+// Function to get dynamic code hint
+async function getDynamicCodeHint(code, hintIndex) {
+  try {
+    const apiKey = await getGeminiApiKey();
+    showHintModal(`Fetching Code Hint ${hintIndex + 1}, please wait...`);
+    
+    // Refine the prompt based on the hint index for progressive hints
+    let hintLevelPrompt = "Provide a subtle hint about potential improvements or issues in the code.";
+    if (hintIndex === 1) {
+        hintLevelPrompt = "Give a slightly more specific hint about a particular part of the code that could be improved.";
+    } else if (hintIndex === 2) {
+        hintLevelPrompt = "Offer a more detailed hint about specific optimizations or fixes needed.";
+    } else if (hintIndex >= 3) {
+        hintLevelPrompt = "Provide a final, more direct hint about critical improvements needed.";
+    }
+
+    const prompt = `Based on the following code, ${hintLevelPrompt} Do not provide the full solution or complete code. Keep the hint concise and focused on guiding the user to improve their code.\n\nCode:\n${code}`;
+    
+    const hint = await callGeminiApi(prompt, apiKey);
+    
+    return hint;
+  } catch (e) {
+    console.error('Error generating code hint with Gemini:', e);
+    return 'Error generating hint: ' + e;
+  }
+}
+
+// Function to show next problem hint
+async function showNextProblemHint() {
   const problemInfo = getProblemInfo();
   if (problemInfo.error) {
     showHintModal('Could not fetch problem info: ' + problemInfo.error);
     return;
   }
   if (problemInfo.title !== lastProblemTitle) {
-    shownHints = [];
-    currentHintIndex = 0;
+    shownProblemHints = [];
+    currentProblemHintIndex = 0;
     lastProblemTitle = problemInfo.title;
   }
 
-  // Show a loading message while fetching the hint
-  showHintModal(`Fetching Hint ${currentHintIndex + 1} for: ${problemInfo.title}...`);
+  showHintModal(`Fetching Problem Hint ${currentProblemHintIndex + 1} for: ${problemInfo.title}...`);
 
-  const nextHint = await getDynamicHint(problemInfo, currentHintIndex); // Await the async call
+  const nextHint = await getDynamicProblemHint(problemInfo, currentProblemHintIndex);
   
-  if (nextHint.startsWith('Error generating hint:')) { // Check if an error was returned
+  if (nextHint.startsWith('Error generating hint:')) {
       showHintModal(nextHint);
       return;
   }
 
-  if (shownHints.length <= currentHintIndex) {
-    shownHints.push(nextHint);
+  if (shownProblemHints.length <= currentProblemHintIndex) {
+    shownProblemHints.push(nextHint);
   }
-  currentHintIndex++;
+  currentProblemHintIndex++;
   
-  let allHintsHtml = `<div style='font-size:1.1em;margin-bottom:10px;'><b>${problemInfo.title}</b></div>`;
-  shownHints.forEach((hint, idx) => {
-    allHintsHtml += `<div style='margin-bottom:12px; color:#e0e0e0;'><b>Hint ${idx+1}:</b><br>${renderMarkdown(hint)}</div>`; // Render markdown for hints
+  let allHintsHtml = `<div style='font-size:1.1em;margin-bottom:10px;'><b>Problem Hints for: ${problemInfo.title}</b></div>`;
+  shownProblemHints.forEach((hint, idx) => {
+    allHintsHtml += `<div style='margin-bottom:12px; color:#e0e0e0;'><b>Hint ${idx+1}:</b><br>${renderMarkdown(hint)}</div>`;
+  });
+  showHintModal(allHintsHtml);
+}
+
+// Function to show next code hint
+async function showNextCodeHint() {
+  const codeLines = Array.from(document.querySelectorAll('.view-line'));
+  let code = codeLines.map(line => line.textContent.replace(/\u00a0|&nbsp;/g, ' ')).join('\n');
+  if (!code.trim()) {
+    showHintModal('Could not read code from the editor.');
+    return;
+  }
+
+  showHintModal(`Fetching Code Hint ${currentCodeHintIndex + 1}...`);
+
+  const nextHint = await getDynamicCodeHint(code, currentCodeHintIndex);
+  
+  if (nextHint.startsWith('Error generating hint:')) {
+      showHintModal(nextHint);
+      return;
+  }
+
+  if (shownCodeHints.length <= currentCodeHintIndex) {
+    shownCodeHints.push(nextHint);
+  }
+  currentCodeHintIndex++;
+  
+  let allHintsHtml = `<div style='font-size:1.1em;margin-bottom:10px;'><b>Code Hints</b></div>`;
+  shownCodeHints.forEach((hint, idx) => {
+    allHintsHtml += `<div style='margin-bottom:12px; color:#e0e0e0;'><b>Hint ${idx+1}:</b><br>${renderMarkdown(hint)}</div>`;
   });
   showHintModal(allHintsHtml);
 }
@@ -517,9 +575,9 @@ function addFloatingMenu() {
     pointer-events: auto;
   `;
 
-  const hintBtn = document.createElement('button');
-  hintBtn.textContent = 'Generate Hint';
-  hintBtn.style.cssText = `
+  const problemHintBtn = document.createElement('button');
+  problemHintBtn.textContent = 'Problem Hint';
+  problemHintBtn.style.cssText = `
     background: #1a1b1e;
     color: #e0e0e0;
     border: 1px solid #2d2e32;
@@ -534,26 +592,64 @@ function addFloatingMenu() {
     align-items: center;
     gap: 8px;
   `;
-  hintBtn.innerHTML = `
+  problemHintBtn.innerHTML = `
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="10"></circle>
       <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
       <line x1="12" y1="17" x2="12.01" y2="17"></line>
     </svg>
-    Generate Hint
+    Problem Hint
   `;
-  hintBtn.onmouseover = () => { 
-    hintBtn.style.background = '#2d2e32';
-    hintBtn.style.borderColor = '#3d3e42';
+  problemHintBtn.onmouseover = () => { 
+    problemHintBtn.style.background = '#2d2e32';
+    problemHintBtn.style.borderColor = '#3d3e42';
   };
-  hintBtn.onmouseout = () => {
-    hintBtn.style.background = '#1a1b1e';
-    hintBtn.style.borderColor = '#2d2e32';
+  problemHintBtn.onmouseout = () => {
+    problemHintBtn.style.background = '#1a1b1e';
+    problemHintBtn.style.borderColor = '#2d2e32';
   };
-  hintBtn.onclick = (e) => {
+  problemHintBtn.onclick = (e) => {
     e.stopPropagation();
     document.getElementById('leetcode-hint-menu')?.remove();
-    showNextHint();
+    showNextProblemHint();
+  };
+
+  const codeHintBtn = document.createElement('button');
+  codeHintBtn.textContent = 'Code Hint';
+  codeHintBtn.style.cssText = `
+    background: #1a1b1e;
+    color: #e0e0e0;
+    border: 1px solid #2d2e32;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 1em;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  `;
+  codeHintBtn.innerHTML = `
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16 18l6-6-6-6"></path>
+      <path d="M8 6l-6 6 6 6"></path>
+    </svg>
+    Code Hint
+  `;
+  codeHintBtn.onmouseover = () => { 
+    codeHintBtn.style.background = '#2d2e32';
+    codeHintBtn.style.borderColor = '#3d3e42';
+  };
+  codeHintBtn.onmouseout = () => {
+    codeHintBtn.style.background = '#1a1b1e';
+    codeHintBtn.style.borderColor = '#2d2e32';
+  };
+  codeHintBtn.onclick = (e) => {
+    e.stopPropagation();
+    document.getElementById('leetcode-hint-menu')?.remove();
+    showNextCodeHint();
   };
 
   const analyzeBtn = document.createElement('button');
@@ -677,10 +773,11 @@ function addFloatingMenu() {
   };
 
 
-  menu.appendChild(hintBtn);
+  menu.appendChild(problemHintBtn);
+  menu.appendChild(codeHintBtn);
   menu.appendChild(analyzeBtn);
   menu.appendChild(testCaseBtn);
-  menu.appendChild(suggestBtn); // Add the new button
+  menu.appendChild(suggestBtn);
   document.body.appendChild(menu);
 
   setTimeout(() => {
