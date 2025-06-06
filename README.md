@@ -48,6 +48,10 @@ A Chrome extension that provides helpful tools powered by AI and other features 
 - Your Gemini API key is stored securely in your browser's local storage.
 - No personal data is stored permanently by the extension.
 
+## 📦 Deployment Instructions
+
+See [deployment.md](deployment.md) for detailed deployment steps.
+
 ## Contributing
 
 Feel free to submit issues and enhancement requests! 
